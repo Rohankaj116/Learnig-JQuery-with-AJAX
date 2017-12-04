@@ -1,144 +1,124 @@
-$(function(){
+$(function() {
+	var $addTodoForm = $("#addTodo");
+	var $listGroup = $(".list-group");
 
-  var $addTodoForm = $("#addTodo");
-  var $listGroup = $(".list-group");
+	var URL = "http://localhost:3000/todos";
 
-  var URL = "http://localhost:3000/todos";
+	//Template
+	var source = $("#listitemtemplate").html();
+	var template = Handlebars.compile(source);
 
-  //Template
-  var source = $("#listitemtemplate").html();
-  var template = Handlebars.compile(source)
+	//Add TodoList
+	$addTodoForm.on("submit", function(event) {
+		event.preventDefault();
 
+		var newTodo = $addTodoForm.find("input").val();
 
+		$addTodoForm.find("input").val("");
 
-  //Add TodoList
-  $addTodoForm.on("submit", function(event){
-  	  event.preventDefault();
+		$.ajax({
+			url: URL,
+			method: "POST",
+			data: {
+				text: newTodo
+			}
+		})
+			.done(function(newTodo) {
+				var listItem = template({
+					text: newTodo.text,
+					id: newTodo.id
+				});
 
-  	  var newTodo = $addTodoForm.find("input").val();
+				$listGroup.append(listItem);
+			})
+			.fail(function() {
+				//errr
+			});
+	});
 
-	  
+	//READ
+	$.ajax({
+		url: URL,
+		method: "GET"
+	})
+		.done(function(data) {
+			data.forEach(function(dataitem) {
+				var listItem = template({
+					text: dataitem.text,
+					id: dataitem.id
+				});
 
-  	  $addTodoForm.find("input").val("");
+				$listGroup.append(listItem);
+			});
+		})
+		.fail(function() {
+			//err
+		});
 
-  	  $.ajax({
-  	  	url:URL,
-  	  	method: "POST",
-  	  	data: {
-  	  	  text:newTodo
-  	  	}
-  	  }).done(function(newTodo){
-  	   
-  	   var listItem = template({
-	  	 text: newTodo.text,
-	  	 id: newTodo.id
-	   })
+	//DELETE TODO
 
-  	  	$listGroup.append(listItem);
+	$listGroup.on("click", ".deletebtn", function(event) {
+		//Closest li
+		var listItem = $(event.target).closest("li.list-group-item");
 
-  	  }).fail(function(){
-  	  	//errr
-  	  })
+		var id = listItem.attr("id");
 
-  });
+		listItem.remove();
 
+		console.log("id", id);
 
-  //READ
-  $.ajax({
-  	url: URL,
-  	method:"GET"
-  }).done(function(data){
-  	
-  	data.forEach(function(dataitem){
-  	  var listItem = template({
-	  	text: dataitem.text,
-	  	id: dataitem.id
-	  })
+		$.ajax({
+			url: URL + "/" + id,
+			method: "DELETE"
+		});
+	});
 
-  	  $listGroup.append(listItem)
-  	})	
+	var editSource = $("#edittemplate").html();
+	var edittemplate = Handlebars.compile(editSource);
 
-  }).fail(function(){
-  	//err
-  })
+	//Edit
+	$listGroup.on("click", ".editbtn", function(event) {
+		//Access List Item
+		var listItem = $(event.target).closest("li.list-group-item");
 
+		//list Item hide
+		listItem.find(".content").hide();
 
+		//add content of list item
+		var content = listItem.find("span").html();
 
-  //DELETE TODO
+		//SUbmit edit form
+		var edithtml = edittemplate({
+			value: content
+		});
 
-  $listGroup.on('click', '.deletebtn', function(event){
+		listItem.append(edithtml);
 
-  	//Closest li
-  	var listItem = $(event.target).closest("li.list-group-item");
+		var $editTodoForm = listItem.find("#editTodo");
 
-  	var id = listItem.attr("id")
+		$editTodoForm.on("submit", function(event) {
+			event.preventDefault();
 
-  	listItem.remove();
+			//replace new value with list item content
 
-  	console.log("id", id)
+			var newcontent = $editTodoForm.find("input").val();
 
-  	$.ajax({
-  		url: URL + '/' + id,
-  		method: "DELETE"
-  	})
+			listItem.find("span").html(newcontent);
 
-  })
+			// Show list item
+			listItem.find(".content").show();
 
-  var editSource = $("#edittemplate").html();
-  var edittemplate = Handlebars.compile(editSource)
+			$editTodoForm.remove();
 
+			var id = listItem.attr("id");
 
-  //Edit
-  $listGroup.on('click', '.editbtn', function(event){
-  	//Access List Item 
-  	var listItem = $(event.target).closest("li.list-group-item");
-
-
-  	//list Item hide
-  	listItem.find(".content").hide();
-
-  	//add content of list item
-  	var content = listItem.find("span").html();
-
-  	//SUbmit edit form
-  	var edithtml  = edittemplate({
-  		value: content
-  	})
-
-  	listItem.append(edithtml);
-
-  	var $editTodoForm = listItem.find("#editTodo");
-
-  	$editTodoForm.on("submit", function(event){
-  		event.preventDefault();
-
-  		//replace new value with list item content
-
-  		var newcontent = $editTodoForm.find("input").val();
-
-  		listItem.find("span").html(newcontent);
-
-  		// Show list item
-  		listItem.find('.content').show();
-
-  		$editTodoForm.remove();
-
-  		var id = listItem.attr("id")
-
-  		$.ajax({
-  			url: URL + "/" + id,
-  			method: "PUT",
-  			data: {
-  				text: newcontent 
-  			}
-  		})
-
-
-  	})
-
-
-  	
-
-  });
-
-})
+			$.ajax({
+				url: URL + "/" + id,
+				method: "PUT",
+				data: {
+					text: newcontent
+				}
+			});
+		});
+	});
+});
