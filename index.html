@@ -31,7 +31,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
     
     <script id="listitemtemplate" type="text/x-handlebars-template">
-        <li class="list-group-item" id={{id}}>
+        <li class="list-group-item">
             <div class="content">
                 <span>{{text}}</span>    
                 <button class="deletebtn btn">Delete</button>
@@ -40,14 +40,7 @@
         </li>
     </script>
 
-    <script id="edittemplate" type="text/x-handlebars-template">
-        <form id="editTodo">
-            <div class="form-group">
-                <input value="{{value}}" type="text" class="form-control" placeholder="Enter Todo">
-            </div>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
-    </script>
+   
 
     <script src="./index.js"></script>
 </body>
