@@ -25,8 +25,7 @@ $(function() {
 		})
 			.done(function(newTodo) {
 				var listItem = template({
-					text: newTodo.text,
-					id: newTodo.id
+					text: newTodo.text
 				});
 
 				$listGroup.append(listItem);
@@ -44,8 +43,7 @@ $(function() {
 		.done(function(data) {
 			data.forEach(function(dataitem) {
 				var listItem = template({
-					text: dataitem.text,
-					id: dataitem.id
+					text: dataitem.text
 				});
 
 				$listGroup.append(listItem);
@@ -55,70 +53,6 @@ $(function() {
 			//err
 		});
 
-	//DELETE TODO
 
-	$listGroup.on("click", ".deletebtn", function(event) {
-		//Closest li
-		var listItem = $(event.target).closest("li.list-group-item");
-
-		var id = listItem.attr("id");
-
-		listItem.remove();
-
-		console.log("id", id);
-
-		$.ajax({
-			url: URL + "/" + id,
-			method: "DELETE"
-		});
-	});
-
-	var editSource = $("#edittemplate").html();
-	var edittemplate = Handlebars.compile(editSource);
-
-	//Edit
-	$listGroup.on("click", ".editbtn", function(event) {
-		//Access List Item
-		var listItem = $(event.target).closest("li.list-group-item");
-
-		//list Item hide
-		listItem.find(".content").hide();
-
-		//add content of list item
-		var content = listItem.find("span").html();
-
-		//SUbmit edit form
-		var edithtml = edittemplate({
-			value: content
-		});
-
-		listItem.append(edithtml);
-
-		var $editTodoForm = listItem.find("#editTodo");
-
-		$editTodoForm.on("submit", function(event) {
-			event.preventDefault();
-
-			//replace new value with list item content
-
-			var newcontent = $editTodoForm.find("input").val();
-
-			listItem.find("span").html(newcontent);
-
-			// Show list item
-			listItem.find(".content").show();
-
-			$editTodoForm.remove();
-
-			var id = listItem.attr("id");
-
-			$.ajax({
-				url: URL + "/" + id,
-				method: "PUT",
-				data: {
-					text: newcontent
-				}
-			});
-		});
-	});
+	
 });
